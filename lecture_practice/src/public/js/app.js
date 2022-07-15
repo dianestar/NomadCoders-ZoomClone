@@ -1,5 +1,77 @@
 const socket = io();
 
+// 비디오 & 오디오 허용
+const $myFace = document.querySelector("#myFace");
+
+let myStream;
+
+async function getMedia() {
+    try {
+        myStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true,
+        });
+        // console.log(myStream);
+        $myFace.srcObject = myStream;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+getMedia();
+
+// 비디오 & 오디오 켜고 끄기
+const $muteBtn = document.querySelector("#mute");
+const $cameraBtn = document.querySelector("#camera");
+
+let muted = false;
+let cameraOff = false;
+
+function handleMuteClick() {
+    // console.log(myStream.getAudioTracks());
+    myStream.getAudioTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+    });
+
+    if (!muted) {
+        $muteBtn.innerText = "Unmute";
+        muted = true;
+    } else {
+        $muteBtn.innerText = "Mute";
+        muted= false;
+    }
+}
+
+function handleCameraClick() {
+    // console.log(myStream.getVideoTracks());
+    myStream.getVideoTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+    });
+
+    if (cameraOff) {
+        $cameraBtn.innerText = "Turn Camera Off";
+        cameraOff = false;
+    } else {
+        $cameraBtn.innerText = "Turn Camera On";
+        cameraOff = true;
+    }
+}
+
+$muteBtn.addEventListener("click", handleMuteClick);
+$cameraBtn.addEventListener("click", handleCameraClick);
+
+// 유저의 장치 얻기
+async function getCameras() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter((device) => device.kind === "videoinput");
+        console.log(cameras);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+/*
 const $welcome = document.querySelector("#welcome");
 const $nickForm = $welcome.querySelector("#nickname");
 
@@ -77,11 +149,11 @@ socket.on("bye", (user, newCount) => {
     addMessage(`${user} left 😥`);
 });
 
-/*
-socket.on("new_message", (message) => {
-    addMessage(message);
-});
-*/
+
+//socket.on("new_message", (message) => {
+//    addMessage(message);
+//});
+
 socket.on("new_message", addMessage);
 
 socket.on("room_change", (rooms) => {
@@ -98,6 +170,7 @@ socket.on("room_change", (rooms) => {
         $roomList.append($li);
     });
 });
+*/
 
 /* using ws
 const $messageList = document.querySelector("ul");
