@@ -1,7 +1,10 @@
 const socket = io();
 
+const $welcome = document.querySelector("#welcome");
 const $call = document.querySelector("#call");
+$call.hidden = true;
 
+/* call div related codes */
 // 유저의 모든 장치 정보 얻기
 const $cameras = document.querySelector("#cameras");
 
@@ -59,7 +62,7 @@ async function getMedia(deviceId) {
     }
 }
 
-getMedia();
+// getMedia();
 
 // 비디오 & 오디오 켜고 끄기
 const $muteBtn = document.querySelector("#mute");
@@ -106,8 +109,58 @@ async function handleCameraChange() {
 }
 
 $cameras.addEventListener("input", handleCameraChange);
+/*************/
 
-/*
+/* welcome div related codes*/
+let roomName;
+
+const $welcomeForm = $welcome.querySelector("form");
+
+async function startMedia() {
+    $welcome.hidden = true;
+    $call.hidden = false;
+    await getMedia();
+    makeConnection();
+}
+
+function handleWelcomeSubmit(e) {
+    e.preventDefault();
+
+    const $input = $welcomeForm.querySelector("input");
+    socket.emit("enter_room", $input.value, startMedia);
+    roomName = $input.value;
+    $input.value = "";
+}
+
+$welcomeForm.addEventListener("submit", handleWelcomeSubmit);
+/*************/
+
+/* socket event related codes */
+socket.on("welcome", async () => {
+    // console.log("someone joined");
+    const offer = await myPeerConnection.createOffer();
+    myPeerConnection.setLocalDescription(offer);
+    socket.emit("offer", offer, roomName);
+    console.log(offer);
+});
+
+socket.on("offer", (offer) => {
+    console.log(offer);
+});
+/*************/
+
+/* RTC related codes */
+let myPeerConnection;
+
+function makeConnection() {
+    myPeerConnection = new RTCPeerConnection();
+    myStream.getTracks().forEach((track) => {
+        myPeerConnection.addTrack(track, myStream);
+    })
+}
+/*************/
+
+/* using socket.io
 const $welcome = document.querySelector("#welcome");
 const $nickForm = $welcome.querySelector("#nickname");
 

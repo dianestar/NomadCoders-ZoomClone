@@ -1,8 +1,8 @@
 import http from "http";
 // import WebSocket from "ws";
-// import SocketIO from "socket.io";
-import { Server } from "socket.io";
-import { instrument } from "@socket.io/admin-ui";
+import SocketIO from "socket.io";
+// import { Server } from "socket.io";
+// import { instrument } from "@socket.io/admin-ui";
 import express from "express";
 
 const app = express();
@@ -13,11 +13,24 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
-
 const httpServer = http.createServer(app);
-// const wsServer = SocketIO(httpServer);
+const wsServer = SocketIO(httpServer);
 
+wsServer.on("connection", (socket) => {
+    socket.on("enter_room", (roomName, done) => {
+        socket.join(roomName);
+        done();
+        socket.to(roomName).emit("welcome");
+    });
+    socket.on("offer", (offer, roomName) => {
+        socket.to(roomName).emit("offer");
+    });
+});
+
+const handleListen = () => console.log("Listening on http://localhost:3000");
+httpServer.listen(3000, handleListen);
+
+/* using socket.io
 const wsServer = new Server(httpServer, {
     cors: {
       origin: ["https://admin.socket.io"],
@@ -78,6 +91,7 @@ wsServer.on("connection", (socket) => {
         wsServer.sockets.emit("room_change", publicRooms());
     });
 });
+*/
 
 /* using ws
 const wss = new WebSocket.Server({ server });
@@ -116,5 +130,3 @@ wss.on("connection", (socket) => {
     })
 });
 */
-
-httpServer.listen(3000, handleListen);
