@@ -4,6 +4,10 @@ const $welcome = document.querySelector("#welcome");
 const $call = document.querySelector("#call");
 $call.hidden = true;
 
+let myStream;
+let myPeerConnection;
+let roomName;
+
 /* call div related codes */
 // 유저의 모든 장치 정보 얻기
 const $cameras = document.querySelector("#cameras");
@@ -37,8 +41,6 @@ async function getCameras() {
 // 비디오 & 오디오 허용
 const $myFace = document.querySelector("#myFace");
 
-let myStream;
-
 async function getMedia(deviceId) {
     const initialConstraints = {
         audio: true,
@@ -51,7 +53,6 @@ async function getMedia(deviceId) {
 
     try {
         myStream = await navigator.mediaDevices.getUserMedia(deviceId ? newConstraints : initialConstraints);
-        // console.log(myStream);
         $myFace.srcObject = myStream;
 
         if (!deviceId) {
@@ -106,28 +107,80 @@ $cameraBtn.addEventListener("click", handleCameraClick);
 
 async function handleCameraChange() {
     await getMedia($cameras.value);
+    if (myPeerConnection) {
+        const videoTrack = myStream.getVideoTracks()[0];
+        console.log(videoTrack);
+
+        const senders = myPeerConnection.getSenders();
+        const ideoSender = senders.find((sender) => {
+            return sender.track.kind === "video"
+        });
+        videoSender.replaceTrack(videoTrack);
+    }
 }
 
 $cameras.addEventListener("input", handleCameraChange);
 /*************/
 
-/* welcome div related codes*/
-let roomName;
+/* RTC related codes */
+function handleIce(data) {
+    console.log("got ice candidate");
+    console.log(data);
 
+    console.log("sent candidate");
+    socket.emit("ice", data.candidate, roomName);
+}
+
+function handleAddStream(data) {
+    console.log("got stream from my peer");
+    console.log("Peer's: ", data.stream);
+    console.log("My: ", myStream);
+
+    const $peersStream = document.querySelector("#peersStream");
+    $peersStream.srcObject = data.stream;
+}
+
+function makeConnection() {
+    myPeerConnection = new RTCPeerConnection({
+        iceServers: [
+            {
+                urls: [
+                    "stun:stun.l.google.com:19302",
+                    "stun:stun1.l.google.com:19302",
+                    "stun:stun2.l.google.com:19302",
+                    "stun:stun3.l.google.com:19302",
+                    "stun:stun4.l.google.com:19302",
+                ],
+            },
+        ],
+    });
+    myPeerConnection.addEventListener("icecandidate", handleIce);
+    myPeerConnection.addEventListener("addstream", handleAddStream);
+
+    myStream.getTracks().forEach((track) => {
+        myPeerConnection.addTrack(track, myStream);
+    });
+}
+/*************/
+
+/* welcome div related codes*/
 const $welcomeForm = $welcome.querySelector("form");
 
-async function startMedia() {
+async function initCall() {
     $welcome.hidden = true;
     $call.hidden = false;
     await getMedia();
     makeConnection();
 }
 
-function handleWelcomeSubmit(e) {
+async function handleWelcomeSubmit(e) {
     e.preventDefault();
 
     const $input = $welcomeForm.querySelector("input");
-    socket.emit("enter_room", $input.value, startMedia);
+    // socket.emit("enter_room", $input.value, initCall);
+    await initCall();
+
+    socket.emit("enter_room", $input.value);
     roomName = $input.value;
     $input.value = "";
 }
@@ -137,27 +190,43 @@ $welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 /* socket event related codes */
 socket.on("welcome", async () => {
-    // console.log("someone joined");
+    console.log("someone joined");
+
     const offer = await myPeerConnection.createOffer();
     myPeerConnection.setLocalDescription(offer);
+
     socket.emit("offer", offer, roomName);
+
+    console.log("sent the offer");
     console.log(offer);
 });
 
-socket.on("offer", (offer) => {
+socket.on("offer", async (offer) => {
+    console.log("received the offer");
+
+    myPeerConnection.setRemoteDescription(offer);
+
+    const answer = await myPeerConnection.createAnswer();
+    myPeerConnection.setLocalDescription(answer);
+
+    console.log("sent the answer");
+
+    socket.emit("answer", answer, roomName);
+    
     console.log(offer);
+    console.log(answer);
 });
-/*************/
 
-/* RTC related codes */
-let myPeerConnection;
+socket.on("answer", (answer) => {
+    console.log("received the answer");
+    
+    myPeerConnection.setRemoteDescription(answer);
+});
 
-function makeConnection() {
-    myPeerConnection = new RTCPeerConnection();
-    myStream.getTracks().forEach((track) => {
-        myPeerConnection.addTrack(track, myStream);
-    })
-}
+socket.on("ice", (ice) => {
+    console.log("received candidate");
+    myPeerConnection.addIceCandidate(ice);
+});
 /*************/
 
 /* using socket.io
