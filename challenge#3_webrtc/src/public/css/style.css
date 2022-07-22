@@ -1,0 +1,196 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    
+    padding: 5vh 10vw;
+}
+
+/* wrapper div */
+#wrapper {
+    background-color: #D7DAE2;
+    min-height: 80vh;
+    box-shadow: 0px 3px 6px lightgray;
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    min-height: 5vh;
+    padding: 0 2.5vw;
+    margin-bottom: 5vh;
+    
+    color: white;
+    background-color: lightseagreen;
+}
+
+/* welcome div */
+#welcome {
+    width: 80%;
+    margin: 0 auto;
+
+    background-color: white;
+    padding: 5vh 5vw;
+    border-radius: 8px;
+    box-shadow: 0px 3px 6px gray;
+}
+
+#welcome > form {
+    height: 20vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#welcome > form > input {
+    width: 200px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid gray;
+    padding: 0 5px;
+
+    font-size: 14px;
+}
+
+#welcome > form > button {
+    width: 200px;
+    padding: 5px 0 5px 0;
+    border-radius: 8px;
+    border: none;
+    background-color: lightseagreen;
+    color: white;
+
+    font-size: 18px;
+}
+
+#welcome > form > button:hover {
+    cursor: pointer;
+    background-color: #3BA58A;
+}
+
+/* call div */
+#call {
+    width: 600px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#call > div {
+    height: 60vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* video div */
+#myStream {
+    display: flex;
+    flex-direction: column;
+}
+
+#controller {
+    display: flex;
+    flex-direction: column;
+}
+
+#on-off {
+    display: flex;
+    justify-content: space-around;
+}
+
+#on-off > div {
+    width: 100px;
+    height: 25px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+
+    margin: 5px;
+    padding: 0 5px;
+    border: 1px solid lightseagreen;
+    border-radius: 8px;
+}
+
+#on-off > div:hover {
+    cursor: pointer;
+    background-color: lightseagreen;
+}
+
+#on-off > div:hover svg {
+    fill: white;
+}
+
+#on-off > div:hover span {
+    color: white;
+}
+
+#on-off > div > span {
+    color: lightseagreen;
+}
+
+svg {
+    width: 25px;
+    height: 25px;
+}
+
+#cameras {
+    width: 250px;
+    height: 25px;
+
+    border-radius: 8px;
+    margin: 5px 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* text div */
+#text > form > input {
+    width: 245px;
+    height: 25px;
+
+    font-size: 14px;
+    border: 1px solid lightgray;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
+#text > form > button {
+    width: 50px;
+    height: 25px;
+    margin-left: 5px;
+
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: lightseagreen;
+    color: white;
+}
+
+#text > form > button:hover {
+    cursor: pointer;
+    background-color: #3BA58A;
+}
+
+#bubble {
+    width: 300px;
+    min-height: 55vh;
+    border-radius: 8px;
+    background-color: white;
+}
+
