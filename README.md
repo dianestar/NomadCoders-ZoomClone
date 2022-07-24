@@ -1,6 +1,7 @@
 # realtime-chat
 
 > 📅 2022-07-12 TUE ~ 2022-07-25 MON
+> <br/>
 > 노마드코더 [줌 클론코딩] 강의를 참고하여 구현하였습니다 🙌
 
 - Challenge #1과 #2는 각각 **WebSockets**과 **Socket.IO**를 활용하여 아래의 기능들을 구현하였습니다
