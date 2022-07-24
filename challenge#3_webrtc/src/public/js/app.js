@@ -3,8 +3,10 @@ const socket = io();
 const $welcome = document.querySelector("#welcome");
 const $call = document.querySelector("#call");
 const $peersStream = document.querySelector("#peersStream");
+const $guide = document.querySelector("p");
 $call.style.display = "none";
 $peersStream.style.display = "none";
+console.log("Is it null?", $peersStream.srcObject);
 
 const $micOn = document.querySelector("#mic-on");
 const $micOff = document.querySelector("#mic-off");
@@ -206,6 +208,29 @@ const handleMessage = (e) => {
 
     $bubbleDiv.scrollTop = $bubbleDiv.scrollHeight;
 }
+
+const handleOpen = () => {
+    const $div = document.createElement("div");
+    $div.innerText = "Hi! Chat has started 👍";
+    $div.style.cssText = "color: lightseagreen; text-align: center";
+    $bubbleDiv.appendChild($div);    
+}
+
+const handleClose = () => {
+    const $div = document.createElement("div");
+    $div.innerText = "Bye! Chat has ended 👋";
+    $div.style.cssText = "color: lightseagreen; text-align: center";
+    $bubbleDiv.appendChild($div);  
+
+    $bubbleDiv.scrollTop = $bubbleDiv.scrollHeight;
+
+    $peersStream.srcObject = null;
+    peerConnection.close();
+
+    $guide.innerText = "Peer has left 😥";
+    $guide.style.display = "";
+    $peersStream.style.display = "none";
+}
 /*************/
 
 /* socket event related codes */
@@ -217,13 +242,8 @@ socket.on("welcome", async () => {
     channel = peerConnection.createDataChannel("chat");
     console.log("Made channel", channel);
 
-    channel.addEventListener("open", () => {
-        const $div = document.createElement("div");
-        $div.innerText = "Hi! Chat has started 👍";
-        $div.style.cssText = "color: lightseagreen; text-align: center";
-        $bubbleDiv.appendChild($div);
-    });
-
+    channel.addEventListener("open", handleOpen);
+    channel.addEventListener("close", handleClose);
     channel.addEventListener("message", handleMessage);
 
     // create offer & setLocalDescription()
@@ -241,14 +261,10 @@ socket.on("offer", async (offer) => {
     // data channel
     peerConnection.addEventListener("datachannel", (event) => {
         channel = event.channel;
+        console.log("Got channel", channel);
 
-        channel.addEventListener("open", () => {
-            const $div = document.createElement("div");
-            $div.innerText = "Hi! Chat has started 👍";
-            $div.style.cssText = "color: lightseagreen; text-align: center";
-            $bubbleDiv.appendChild($div);    
-        });
-        
+        channel.addEventListener("open", handleOpen);
+        channel.addEventListener("close", handleClose);            
         channel.addEventListener("message", handleMessage);
     });
 
@@ -297,8 +313,7 @@ function handleAddStream(data) {
     console.log("Peer's: ", data.stream);
     console.log("My: ", myStream);
 
-    const $yetP = document.querySelector("p");
-    $yetP.style.display = "none";
+    $guide.style.display = "none";
     $peersStream.style.display = "";
     $peersStream.srcObject = data.stream;
 }
