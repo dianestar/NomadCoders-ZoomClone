@@ -94,6 +94,11 @@ header {
     justify-content: space-between;
 }
 
+#call > #video > p {
+    font-weight: bold;
+    margin-top: 100px;
+}
+
 /* video div */
 #myStream {
     display: flex;
@@ -188,9 +193,23 @@ svg {
 }
 
 #bubble {
+    overflow: auto;
+    overflow-x: hidden;
     width: 300px;
     min-height: 55vh;
     border-radius: 8px;
     background-color: white;
+    padding: 10px;
 }
 
+#bubble::-webkit-scrollbar {
+    width: 5px;
+}
+
+#bubble::-webkit-scrollbar-thumb {
+    background-color: gray;
+}
+
+#bubble::-webkit-scrollbar-track {
+    background-color: lightgray;
+}
